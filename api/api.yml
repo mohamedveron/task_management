@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Task Management Service
+components:
+  schemas:
+    NewTask:
+      type: object
+      required:
+        - name
+        - state
+      properties:
+        name:
+          type: string
+        state:
+          type: string
+          enum: [ planned, active, done, failed ]
+          default: planned
+
+    Task:
+      allOf:
+        - $ref: '#/components/schemas/NewTask'
+        - type: object
+          required:
+            - "id"
+          properties:
+            id:
+              type: string
+            owner:
+              $ref: '#/components/schemas/User'
+            paticipants:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+              description: paticipants in the task
+
+    User:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+
+paths:
+  /tasks:
+    post:
+      summary: Create new task
+      operationId: createtask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Newtask'
+      responses:
+        '201':
+          description: task is created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        '400':
+          description: Bad request
+        '409':
+          description: Conflict in insertion
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Get all tasks
+      operationId: gettasks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/task'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  '/tasks/{id}':
+    put:
+      summary: Update task
+      operationId: updatetask
+      parameters:
+        - name: id
+          in: path
+          description: ID of the task
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Newtask'
+      responses:
+        '204':
+          description: task is updated
+        '400':
+          description: Bad request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+
+  /Users:
+    get:
+      summary: Get all Users
+      operationId: getUsers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
