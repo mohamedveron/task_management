@@ -1,6 +1,8 @@
 package api
 
-import "github.com/mohamedveron/task_management/service"
+import (
+	"github.com/mohamedveron/task_management/service"
+)
 
 type Server struct {
 	svc *service.Service

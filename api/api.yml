@@ -61,7 +61,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Newtask'
+              $ref: '#/components/schemas/NewTask'
       responses:
         '201':
           description: task is created
@@ -81,7 +81,7 @@ paths:
 
     get:
       summary: Get all tasks
-      operationId: gettasks
+      operationId: getTasks
       responses:
         '200':
           description: OK
@@ -93,7 +93,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/task'
+                      $ref: '#/components/schemas/Task'
         '400':
           description: Bad request
         '500':
@@ -115,7 +115,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Newtask'
+              $ref: '#/components/schemas/NewTask'
       responses:
         '204':
           description: task is updated

@@ -8,7 +8,7 @@ import (
 
 func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request){
 
-	var newTask Newtask
+	var newTask NewTask
 
 	if err := json.NewDecoder(r.Body).Decode(&newTask); err != nil {
 		w.WriteHeader(http.StatusBadRequest)

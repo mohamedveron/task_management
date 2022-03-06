@@ -6,7 +6,7 @@ VERSION = $(shell printf "%s.%s" \
 generate:
 	@echo :: getting generator
 	go get -v -d
-	go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
+	go get github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.8.2
 
 	@echo :: generating code
 
