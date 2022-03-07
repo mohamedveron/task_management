@@ -19,7 +19,7 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request){
 		ID:           "",
 		Name:         newTask.Name,
 		Owner:        domains.User{},
-		State:        domains.EnumtaskState(newTask.State),
+		State:        domains.EnumtaskStateInProgress,
 	}
 
 	id, err := s.svc.CreateTask(task)

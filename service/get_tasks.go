@@ -4,7 +4,7 @@ import (
 	"github.com/mohamedveron/task_management/domains"
 )
 
-func (s *Service) Gettasks() ([]domains.Task, error){
+func (s *Service) GetTasks() ([]domains.Task, error){
 
 	tasksList := []domains.Task{}
 

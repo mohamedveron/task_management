@@ -5,9 +5,9 @@ import (
 	"net/http"
 )
 
-func (s *Server) GetTasks(w http.ResponseWriter, r *http.Request){
+func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request, id string) {
 
-	tasks , err := s.svc.GetTasks()
+	res, err := s.svc.DeleteUser(id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -15,5 +15,5 @@ func (s *Server) GetTasks(w http.ResponseWriter, r *http.Request){
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tasks)
+	json.NewEncoder(w).Encode(res)
 }

@@ -5,9 +5,8 @@ import (
 	"net/http"
 )
 
-func (s *Server) GetTasks(w http.ResponseWriter, r *http.Request){
-
-	tasks , err := s.svc.GetTasks()
+func (s *Server) GetTask(w http.ResponseWriter, r *http.Request, id string) {
+	task , err := s.svc.GetTask(id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -15,5 +14,5 @@ func (s *Server) GetTasks(w http.ResponseWriter, r *http.Request){
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tasks)
+	json.NewEncoder(w).Encode(task)
 }

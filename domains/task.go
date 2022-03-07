@@ -5,7 +5,7 @@ import "time"
 type EnumtaskState string
 
 const (
-	EnumtaskStatePlanned EnumtaskState = "planned"
+	EnumtaskStateInProgress EnumtaskState = "inProgress"
 	EnumtaskStateActive  EnumtaskState = "active"
 	EnumtaskStateDone    EnumtaskState = "done"
 	EnumtaskStateFailed  EnumtaskState = "failed"
@@ -18,5 +18,5 @@ type Task struct {
 	CreatedAt      time.Time     `json:"created_at"`
 	Estimation     float32       `json:"estimation"`
 	ReminderPeriod float32       `json:"reminder_period"`
-	State          EnumtaskState `json:"state" validate:"oneof=planned active done failed"`
+	State          EnumtaskState `json:"state" validate:"oneof=inProgress active done failed"`
 }

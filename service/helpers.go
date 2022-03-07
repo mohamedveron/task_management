@@ -1,21 +1,15 @@
 package service
 
-import "github.com/mohamedveron/task_management/domains"
+import (
+	"math/rand"
+)
 
-func (s *Service) findTaskById(id string) *domains.Task{
+func RandGeneratePassword(n int) string {
 
-	if task, ok := s.tasksDB[id]; ok {
-		return &task
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
-
-	return nil
-}
-
-func (s *Service) findUserById(id string) *domains.User{
-
-	if User, ok := s.UsersDB[id]; ok {
-		return &User
-	}
-
-	return nil
+	return string(b)
 }

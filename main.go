@@ -20,26 +20,18 @@ func main() {
 		Email:      "peter_golm@visable.com",
 	}
 
-	User2 := domains.User{
-		ID:         "33cc",
-		FirstName:  "Andreas",
-		LastName:   "Litt",
-		Email:      "Andreas_Litt@visable.com",
-	}
-
 	// make a list of tasks to do the operation instead of db
 	task1 := domains.Task{
 		ID:           "11bb",
 		Name:         "task management",
 		Owner:        domains.User{},
-		State:        domains.EnumtaskStatePlanned,
+		State:        domains.EnumtaskStateInProgress,
 	}
 
 	tasksDB := make(map[string]domains.Task)
 	UsersDB := make(map[string]domains.User)
 
 	UsersDB["11aa"] = User1
-	UsersDB["33cc"] = User2
 
 	tasksDB["11bb"] = task1
 

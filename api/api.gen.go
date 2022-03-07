@@ -11,36 +11,20 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Defines values for NewTaskState.
-const (
-	NewTaskStateActive NewTaskState = "active"
-
-	NewTaskStateDone NewTaskState = "done"
-
-	NewTaskStateFailed NewTaskState = "failed"
-
-	NewTaskStatePlanned NewTaskState = "planned"
-)
-
 // NewTask defines model for NewTask.
 type NewTask struct {
-	Name  string       `json:"name"`
-	State NewTaskState `json:"state"`
+	Estimation     float32 `json:"estimation"`
+	Name           string  `json:"name"`
+	OwnerId        string  `json:"ownerId"`
+	ReminderPeriod float32 `json:"reminderPeriod"`
 }
-
-// NewTaskState defines model for NewTask.State.
-type NewTaskState string
 
 // Task defines model for Task.
 type Task struct {
 	// Embedded struct due to allOf(#/components/schemas/NewTask)
 	NewTask `yaml:",inline"`
 	// Embedded fields due to inline allOf schema
-	Id    string `json:"id"`
-	Owner *User  `json:"owner,omitempty"`
-
-	// paticipants in the task
-	Paticipants *[]User `json:"paticipants,omitempty"`
+	Id string `json:"id"`
 }
 
 // User defines model for User.
@@ -51,32 +35,44 @@ type User struct {
 	LastName  string `json:"lastName"`
 }
 
-// CreatetaskJSONBody defines parameters for Createtask.
-type CreatetaskJSONBody NewTask
+// CreateTaskJSONBody defines parameters for CreateTask.
+type CreateTaskJSONBody NewTask
 
-// UpdatetaskJSONBody defines parameters for Updatetask.
-type UpdatetaskJSONBody NewTask
+// CreateUserJSONBody defines parameters for CreateUser.
+type CreateUserJSONBody User
 
-// CreatetaskJSONRequestBody defines body for Createtask for application/json ContentType.
-type CreatetaskJSONRequestBody CreatetaskJSONBody
+// CreateTaskJSONRequestBody defines body for CreateTask for application/json ContentType.
+type CreateTaskJSONRequestBody CreateTaskJSONBody
 
-// UpdatetaskJSONRequestBody defines body for Updatetask for application/json ContentType.
-type UpdatetaskJSONRequestBody UpdatetaskJSONBody
+// CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
+type CreateUserJSONRequestBody CreateUserJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get all Users
-	// (GET /Users)
-	GetUsers(w http.ResponseWriter, r *http.Request)
 	// Get all tasks
 	// (GET /tasks)
 	GetTasks(w http.ResponseWriter, r *http.Request)
 	// Create new task
 	// (POST /tasks)
-	Createtask(w http.ResponseWriter, r *http.Request)
-	// Update task
-	// (PUT /tasks/{id})
-	Updatetask(w http.ResponseWriter, r *http.Request, id string)
+	CreateTask(w http.ResponseWriter, r *http.Request)
+	// delete task
+	// (DELETE /tasks/{id})
+	DeleteTask(w http.ResponseWriter, r *http.Request, id string)
+	// Get task by id
+	// (GET /tasks/{id})
+	GetTask(w http.ResponseWriter, r *http.Request, id string)
+	// Get all Users
+	// (GET /users)
+	GetUsers(w http.ResponseWriter, r *http.Request)
+	// Create new user
+	// (POST /users)
+	CreateUser(w http.ResponseWriter, r *http.Request)
+	// delete user
+	// (DELETE /users/{id})
+	DeleteUser(w http.ResponseWriter, r *http.Request, id string)
+	// Get User by id
+	// (GET /users/{id})
+	GetUser(w http.ResponseWriter, r *http.Request, id string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -86,21 +82,6 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
-
-// GetUsers operation middleware
-func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUsers(w, r)
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler(w, r.WithContext(ctx))
-}
 
 // GetTasks operation middleware
 func (siw *ServerInterfaceWrapper) GetTasks(w http.ResponseWriter, r *http.Request) {
@@ -117,12 +98,12 @@ func (siw *ServerInterfaceWrapper) GetTasks(w http.ResponseWriter, r *http.Reque
 	handler(w, r.WithContext(ctx))
 }
 
-// Createtask operation middleware
-func (siw *ServerInterfaceWrapper) Createtask(w http.ResponseWriter, r *http.Request) {
+// CreateTask operation middleware
+func (siw *ServerInterfaceWrapper) CreateTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.Createtask(w, r)
+		siw.Handler.CreateTask(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -132,8 +113,8 @@ func (siw *ServerInterfaceWrapper) Createtask(w http.ResponseWriter, r *http.Req
 	handler(w, r.WithContext(ctx))
 }
 
-// Updatetask operation middleware
-func (siw *ServerInterfaceWrapper) Updatetask(w http.ResponseWriter, r *http.Request) {
+// DeleteTask operation middleware
+func (siw *ServerInterfaceWrapper) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -148,7 +129,115 @@ func (siw *ServerInterfaceWrapper) Updatetask(w http.ResponseWriter, r *http.Req
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.Updatetask(w, r, id)
+		siw.Handler.DeleteTask(w, r, id)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetTask operation middleware
+func (siw *ServerInterfaceWrapper) GetTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid format for parameter id: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTask(w, r, id)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetUsers operation middleware
+func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsers(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// CreateUser operation middleware
+func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateUser(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteUser operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid format for parameter id: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteUser(w, r, id)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetUser operation middleware
+func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid format for parameter id: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUser(w, r, id)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -196,16 +285,28 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/Users", wrapper.GetUsers)
-	})
-	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/tasks", wrapper.GetTasks)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/tasks", wrapper.Createtask)
+		r.Post(options.BaseURL+"/tasks", wrapper.CreateTask)
 	})
 	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/tasks/{id}", wrapper.Updatetask)
+		r.Delete(options.BaseURL+"/tasks/{id}", wrapper.DeleteTask)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/tasks/{id}", wrapper.GetTask)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users", wrapper.GetUsers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/users", wrapper.CreateUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/users/{id}", wrapper.DeleteUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/{id}", wrapper.GetUser)
 	})
 
 	return r
