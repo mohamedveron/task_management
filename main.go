@@ -12,28 +12,11 @@ import (
 
 func main() {
 
-	// make a list of Users to do the operation instead of db
-	User1 := domains.User{
-		ID:         "11aa",
-		FirstName:  "Peter",
-		LastName:   "Golm",
-		Email:      "peter_golm@visable.com",
-	}
-
 	// make a list of tasks to do the operation instead of db
-	task1 := domains.Task{
-		ID:           "11bb",
-		Name:         "task management",
-		Owner:        domains.User{},
-		State:        domains.EnumtaskStateInProgress,
-	}
-
 	tasksDB := make(map[string]domains.Task)
+
+	// make a list of Users to do the operation instead of db
 	UsersDB := make(map[string]domains.User)
-
-	UsersDB["11aa"] = User1
-
-	tasksDB["11bb"] = task1
 
 	serviceLayer := service.NewService(tasksDB, UsersDB)
 	server := api.NewServer(serviceLayer)
