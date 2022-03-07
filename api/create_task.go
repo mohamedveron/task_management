@@ -18,7 +18,7 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request){
 	task := domains.Task{
 		ID:           "",
 		Name:         newTask.Name,
-		Owner:        domains.User{},
+		Owner:        domains.User{ID: newTask.OwnerId},
 		State:        domains.EnumtaskStateInProgress,
 	}
 

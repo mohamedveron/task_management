@@ -2,7 +2,7 @@ package service
 
 func (s *Service) DeleteUser(id string) (string, error){
 
-	if _, ok := s.UsersDB[id]; ok {
+	if _, ok := s.UsersDB[id]; !ok {
 		return "not exist", nil
 	}
 

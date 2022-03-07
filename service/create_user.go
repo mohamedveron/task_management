@@ -5,7 +5,7 @@ import "github.com/mohamedveron/task_management/domains"
 func (s *Service) CreateUser(user domains.User) (string, error) {
 
 	// generate new id
-	id := RandGeneratePassword(4)
+	id := RandGeneratePassword(16)
 
 	user = domains.User{
 		ID:        id,

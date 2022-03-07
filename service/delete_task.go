@@ -2,7 +2,7 @@ package service
 
 func (s *Service) DeleteTask(id string) (string, error){
 
-	if _, ok := s.tasksDB[id]; ok {
+	if _, ok := s.tasksDB[id]; !ok {
 		return "not exist", nil
 	}
 
