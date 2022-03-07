@@ -10,11 +10,15 @@ func (s *Service) CreateTask(task domains.Task) (string, error) {
 	// generate new id
 	id := RandGeneratePassword(16)
 
-	task.ID = id
-
-	s.tasksDB[id] = task
-
 	owner, err := s.GetUserById(task.Owner.ID)
+
+	// check overlap
+	for _, v := range s.tasksDB {
+
+		if v.Owner.ID == task.Owner.ID && v.State == domains.EnumtaskStateInProgress{
+			return "overlap task detected", errors.New("overlap task")
+		}
+	}
 
 	if owner == nil || err != nil {
 		return "not exist", errors.New("User not exist")

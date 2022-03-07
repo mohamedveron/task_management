@@ -26,7 +26,7 @@ func (s *Server) CreateTask(w http.ResponseWriter, r *http.Request){
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		return
+		json.NewEncoder(w).Encode(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
